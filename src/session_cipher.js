@@ -9,6 +9,7 @@ const curve = require('./curve');
 const errors = require('./errors');
 const protobufs = require('./protobufs');
 const queueJob = require('./queue_job');
+const { Mutex } = require('async-mutex');
 
 const VERSION = 3;
 
@@ -58,8 +59,8 @@ class SessionCipher {
         await this.storage.storeSession(this.addr.toString(), record);
     }
 
-    async queueJob(awaitable) {
-        return await queueJob(this.addr.toString(), awaitable);
+    async queueJob(awaitable) { 
+        return new Mutex().runExclusive(awaitable);
     }
 
     async encrypt(data) {
