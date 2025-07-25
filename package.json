@@ -3,7 +3,9 @@
   "version": "2.0.1",
   "description": "Open Whisper Systems' libsignal for Node.js",
   "repository": "WhiskeySockets/libsignal-node",
-  "main": "index.js",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "keywords": [
     "signal",
     "whispersystems",
@@ -11,13 +13,37 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
+    "@bufbuild/protobuf": "^2.6.2",
+    "@noble/ciphers": "^1.3.0",
+    "@noble/hashes": "^1.8.0",
+    "async-mutex": "^0.5.0",
     "curve25519-js": "^0.0.4",
     "protobufjs": "6.8.8"
   },
   "files": [
-    "src/*"
+    "dist"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "development": "./src/index.ts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "proto:fetch": "bun ./scripts/fetch-proto.ts",
+    "proto:gen": "buf generate",
+    "build": "tsup src/index.ts --format=esm --dts",
+    "lint": "eslint . --ext .ts"
+  },
   "devDependencies": {
-    "eslint": "6.0.1"
+    "@bufbuild/buf": "^1.55.1",
+    "@bufbuild/protoc-gen-es": "^2.6.2",
+    "acorn": "^8.15.0",
+    "acorn-walk": "^8.3.4",
+    "eslint": "6.0.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
   }
 }
