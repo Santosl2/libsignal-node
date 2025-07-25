@@ -5,3 +5,4 @@ export * from "./ProtocolAddress";
 export * from "./types";
 export * from "./utils/Crypto";
 export * from '../gen'
+export * from './utils/Curve';
