@@ -2230,6 +2230,7 @@ var ChainType = {
 };
 
 // src/utils/Crypto.ts
+import * as nodeCrypto from "crypto";
 import { cbc } from "@noble/ciphers/aes";
 import { hmac as nobleHmac } from "@noble/hashes/hmac";
 import { sha256 as nobleSha256 } from "@noble/hashes/sha2";
@@ -2265,6 +2266,14 @@ function aesDecrypt(key, buffer, iv) {
   const cipher = cbc(key, iv);
   const plaintext = cipher.decrypt(buffer);
   return plaintext;
+}
+function decipherivEncrypt(key, data, iv) {
+  const cipher = nodeCrypto.createCipheriv("aes-256-cbc", key, iv);
+  return Buffer.concat([cipher.update(data), cipher.final()]);
+}
+function decipherivDecrypt(key, data, iv) {
+  const decipher = nodeCrypto.createDecipheriv("aes-256-cbc", key, iv);
+  return Buffer.concat([decipher.update(data), decipher.final()]);
 }
 
 // src/SessionBuilder.ts
@@ -3683,6 +3692,8 @@ export {
   WebNotificationsInfoSchema,
   aesDecrypt,
   aesEncrypt,
+  decipherivDecrypt,
+  decipherivEncrypt,
   file_SignalSession,
   file_Whatsapp,
   hkdfSignalDeriveSecrets,
