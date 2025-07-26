@@ -8,7 +8,7 @@ const crypto = require('./crypto');
 const curve = require('./curve');
 const errors = require('./errors');
 const protobufs = require('./protobufs');
-const queueJob = require('./queue_job');
+const { queueJob } = require('./queue_job');
 
 const VERSION = 3;
 
