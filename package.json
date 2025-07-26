@@ -3,9 +3,10 @@
   "version": "2.0.1",
   "description": "Open Whisper Systems' libsignal for Node.js",
   "repository": "WhiskeySockets/libsignal-node",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
   "keywords": [
     "signal",
     "whispersystems",
@@ -25,9 +26,9 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.mts",
+      "types": "./dist/index.d.ts",
       "development": "./src/index.ts",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
