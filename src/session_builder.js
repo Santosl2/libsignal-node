@@ -7,7 +7,7 @@ const SessionRecord = require('./session_record');
 const crypto = require('./crypto');
 const curve = require('./curve');
 const errors = require('./errors');
-const { queueJob } = require('./queue_job');
+const queueJob = require('./queue_job');
 
 
 class SessionBuilder {
