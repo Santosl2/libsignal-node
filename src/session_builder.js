@@ -7,7 +7,7 @@ const SessionRecord = require('./session_record');
 const crypto = require('./crypto');
 const curve = require('./curve');
 const errors = require('./errors');
-const { Mutex } = require('async-mutex');
+const { queueJob } = require('./queue_job');
 
 
 class SessionBuilder {
@@ -19,7 +19,7 @@ class SessionBuilder {
 
     async initOutgoing(device) {
         const fqAddr = this.addr.toString();
-        return await new Mutex().runExclusive( async () => {
+        return await queueJob(fqAddr, async () => {
             if (!await this.storage.isTrustedIdentity(this.addr.id, device.identityKey)) {
                 throw new errors.UntrustedIdentityKeyError(this.addr.id, device.identityKey);
             }
