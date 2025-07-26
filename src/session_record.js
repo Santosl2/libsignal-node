@@ -278,7 +278,7 @@ class SessionRecord {
         if (!this.isClosed(session)) {
             console.warn("Session already open");
         }
-        console.info("Opening session:", session);
+        //console.info("Opening session:", session);
         session.indexInfo.closed = -1;
     }
 
@@ -298,7 +298,7 @@ class SessionRecord {
                 }
             }
             if (oldestKey) {
-                console.info("Removing old closed session:", oldestSession);
+               // console.info("Removing old closed session:", oldestSession);
                 delete this.sessions[oldestKey];
             } else {
                 throw new Error('Corrupt sessions object');
