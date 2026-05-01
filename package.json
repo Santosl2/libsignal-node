@@ -10,7 +10,15 @@
     "crypto"
   ],
   "license": "GPL-3.0",
+  "scripts": {
+    "test": "jest --testPathPatterns=tests/",
+    "bench": "node benchmark/bench.js",
+    "bench:curve": "node benchmark/bench.js curve",
+    "bench:crypto": "node benchmark/bench.js crypto",
+    "bench:session": "node benchmark/bench.js session"
+  },
   "dependencies": {
+    "@wppconnect/curve25519": "^1.0.0",
     "async-mutex": "^0.5.0",
     "curve25519-js": "^0.0.4",
     "protobufjs": "6.8.8"
@@ -19,6 +27,7 @@
     "src/*"
   ],
   "devDependencies": {
-    "eslint": "6.0.1"
+    "eslint": "6.0.1",
+    "jest": "^30.3.0"
   }
 }

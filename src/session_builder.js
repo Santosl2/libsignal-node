@@ -9,6 +9,11 @@ const curve = require('./curve');
 const errors = require('./errors');
 const queueJob = require('./queue_job');
 
+// Pre-allocated static Buffers reused across calls.
+const WHISPER_TEXT_INFO = Buffer.from('WhisperText');
+const WHISPER_RATCHET_INFO = Buffer.from('WhisperRatchet');
+const ZERO_SALT = Buffer.alloc(32);
+
 
 class SessionBuilder {
 
@@ -118,8 +123,8 @@ class SessionBuilder {
             const a4 = curve.calculateAgreement(theirEphemeralPubKey, ourEphemeralKey.privKey);
             sharedSecret.set(new Uint8Array(a4), 32 * 4);
         }
-        const masterKey = crypto.deriveSecrets(Buffer.from(sharedSecret), Buffer.alloc(32),
-                                               Buffer.from("WhisperText"));
+        const masterKey = crypto.deriveSecrets(Buffer.from(sharedSecret), ZERO_SALT,
+                                               WHISPER_TEXT_INFO);
         const session = SessionRecord.createEntry();
         session.registrationId = registrationId;
         session.currentRatchet = {
@@ -148,7 +153,7 @@ class SessionBuilder {
     calculateSendingRatchet(session, remoteKey) {
         const ratchet = session.currentRatchet;
         const sharedSecret = curve.calculateAgreement(remoteKey, ratchet.ephemeralKeyPair.privKey);
-        const masterKey = crypto.deriveSecrets(sharedSecret, ratchet.rootKey, Buffer.from("WhisperRatchet"));
+        const masterKey = crypto.deriveSecrets(sharedSecret, ratchet.rootKey, WHISPER_RATCHET_INFO);
         session.addChain(ratchet.ephemeralKeyPair.pubKey, {
             messageKeys: {},
             chainKey: {
