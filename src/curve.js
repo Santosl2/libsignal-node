@@ -14,6 +14,17 @@ const PRIVATE_KEY_DER_PREFIX = Buffer.from([
 
 const KEY_BUNDLE_TYPE = Buffer.from([5]);
 
+// Cached DER buffers reused across calculateAgreement calls to avoid per-call Buffer.concat allocations
+const _PRIV_DER_BUF = Buffer.allocUnsafe(PRIVATE_KEY_DER_PREFIX.length + 32);
+PRIVATE_KEY_DER_PREFIX.copy(_PRIV_DER_BUF);
+const _PUB_DER_BUF = Buffer.allocUnsafe(PUBLIC_KEY_DER_PREFIX.length + 32);
+PUBLIC_KEY_DER_PREFIX.copy(_PUB_DER_BUF);
+
+// Symbols used to cache Node.js KeyObject instances directly on Buffer objects,
+// so the same privKey/pubKey Buffer instance doesn't trigger redundant DER parsing.
+const _PRIV_KEY_OBJ_SYM = Symbol('privKeyObj');
+const _PUB_KEY_OBJ_SYM = Symbol('pubKeyObj');
+
 const prefixKeyInPublicKey = function (pubKey) {
   return Buffer.concat([KEY_BUNDLE_TYPE, pubKey]);
 };
@@ -91,6 +102,7 @@ exports.generateKeyPair = function() {
 };
 
 exports.calculateAgreement = function(pubKey, privKey) {
+    const origPubKey = pubKey;
     pubKey = scrubPubKeyFormat(pubKey);
     validatePrivKey(privKey);
     if (!pubKey || pubKey.byteLength != 32) {
@@ -98,16 +110,20 @@ exports.calculateAgreement = function(pubKey, privKey) {
     }
 
     if(typeof nodeCrypto.diffieHellman === 'function') {
-        const nodePrivateKey = nodeCrypto.createPrivateKey({
-            key: Buffer.concat([PRIVATE_KEY_DER_PREFIX, privKey]),
-            format: 'der',
-            type: 'pkcs8'
-        });
-        const nodePublicKey = nodeCrypto.createPublicKey({
-            key: Buffer.concat([PUBLIC_KEY_DER_PREFIX, pubKey]),
-            format: 'der',
-            type: 'spki'
-        });
+        // Cache KeyObjects on the Buffer instances via Symbols to avoid
+        // redundant DER parsing on repeated calls with the same key object.
+        let nodePrivateKey = privKey[_PRIV_KEY_OBJ_SYM];
+        if (!nodePrivateKey) {
+            privKey.copy(_PRIV_DER_BUF, PRIVATE_KEY_DER_PREFIX.length);
+            nodePrivateKey = nodeCrypto.createPrivateKey({ key: _PRIV_DER_BUF, format: 'der', type: 'pkcs8' });
+            privKey[_PRIV_KEY_OBJ_SYM] = nodePrivateKey;
+        }
+        let nodePublicKey = origPubKey[_PUB_KEY_OBJ_SYM];
+        if (!nodePublicKey) {
+            pubKey.copy(_PUB_DER_BUF, PUBLIC_KEY_DER_PREFIX.length);
+            nodePublicKey = nodeCrypto.createPublicKey({ key: _PUB_DER_BUF, format: 'der', type: 'spki' });
+            origPubKey[_PUB_KEY_OBJ_SYM] = nodePublicKey;
+        }
         
         return nodeCrypto.diffieHellman({
             privateKey: nodePrivateKey,
